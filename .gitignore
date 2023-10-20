@@ -1,0 +1,6 @@
+research_papers/*pdf
+venv
+*.env
+*.json
+data.csv
+data_processing.py
