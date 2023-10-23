@@ -1,0 +1,3 @@
+venv
+neo4j.txt
+*.env
