@@ -14,12 +14,12 @@ os.environ["NEO4J_URI"] = os.getenv('NEO4J_URI')
 os.environ["NEO4J_USERNAME"] = os.getenv('NEO4J_USERNAME')
 os.environ["NEO4J_PASSWORD"] = os.getenv('NEO4J_PASSWORD')
 
-print(os.environ["NEO4J_PASSWORD"])
+print(os.environ["NEO4J_URI"], os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 graph = Neo4jGraph(
-    url="neo4j+s://23975803.databases.neo4j.io",
-    username="neo4j",
-    password="_RVnhFFLdXXnMNSRJljAULz5GRUMVsKSXKZ1Lu3gw9E"
+    url=os.environ["NEO4J_URI"],
+    username=os.environ["NEO4J_USERNAME"],
+    password=os.environ["NEO4J_PASSWORD"]
 )
 
 if __name__ == '__main__':
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     graph.refresh_schema
     print(graph.schema)
     
-    query = "Which techniques are used for summarization?"
+    query = "how rnn will help in text summarization"
     vector_results = neo4j_vector.similarity_search(query, k=2)
     vector_result = vector_results[0].page_content
 
