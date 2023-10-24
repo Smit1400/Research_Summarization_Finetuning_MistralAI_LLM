@@ -21,9 +21,9 @@ from tqdm import tqdm
 
 os.environ["OPENAI_API_KEY"] = "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"
 
-url = "neo4j+s://d1d5cc9b.databases.neo4j.io"
+url = "neo4j+s://23975803.databases.neo4j.io"
 username="neo4j"
-password="yul3ynAibcbizogTqGcbe_LAijgbqQf9FBKf4iK7lB8"
+password="_RVnhFFLdXXnMNSRJljAULz5GRUMVsKSXKZ1Lu3gw9E"
 graph = Neo4jGraph(
     url=url,
     username=username,
@@ -145,13 +145,13 @@ def extract_and_store_graph(
     
     
 if __name__ == '__main__':
-    graph.query("MATCH (n) DETACH DELETE n")
+    # graph.query("MATCH (n) DETACH DELETE n")
     llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
     loader = DirectoryLoader("research_papers/", glob="*.pdf", loader_cls=PyPDFLoader)
     load_data = loader.load()
     text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=100)
     
-    documents = text_splitter.split_documents(load_data)
+    documents = text_splitter.split_documents(load_data[:10])
     
     for i, d in tqdm(enumerate(documents), total=len(documents)):
         extract_and_store_graph(d)
