@@ -1,19 +1,24 @@
 from langchain.graphs import Neo4jGraph
 from langchain.chains import GraphCypherQAChain
 from langchain.chat_models import ChatOpenAI
+from dotenv import load_dotenv
 import os
 
-os.environ["OPENAI_API_KEY"] = "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"
+load_dotenv()
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+os.environ["NEO4J_URI"] = os.getenv("NEO4J_URI")
+os.environ["NEO4J_USERNAME"] = os.getenv("NEO4J_USERNAME")
+os.environ["NEO4J_PASSWORD"] = os.getenv("NEO4J_PASSWORD")
 
-url = "bolt://localhost:7687"
-username="neo4j"
-password="Chhadva1234#"
-graph = Neo4jGraph(
-    url=url,
-    username=username,
-    password=password
+print(
+    os.environ["NEO4J_URI"], os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"]
 )
 
+graph = Neo4jGraph(
+    url=os.environ["NEO4J_URI"],
+    username=os.environ["NEO4J_USERNAME"],
+    password=os.environ["NEO4J_PASSWORD"],
+)
 # graph.refresh_schema()
 
 # cypher_chain = GraphCypherQAChain.from_llm(

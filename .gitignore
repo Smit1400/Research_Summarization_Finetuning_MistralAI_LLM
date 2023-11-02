@@ -2,3 +2,4 @@ venv
 neo4j.txt
 *.env
 newenv
+*.txt
