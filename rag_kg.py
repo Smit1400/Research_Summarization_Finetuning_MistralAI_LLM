@@ -21,11 +21,15 @@ graph = Neo4jGraph(
     password=os.environ["NEO4J_PASSWORD"],
 )
 
-if __name__ == "__main__":
+def data_ingestion():
     loader = DirectoryLoader("research_papers/", glob="*.pdf", loader_cls=PyPDFLoader)
     load_data = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
     documents = text_splitter.split_documents(load_data)
+
+if __name__ == "__main__":
+    
+    
 
     neo4j_vector = Neo4jVector.from_documents(
         documents=documents,
