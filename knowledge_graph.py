@@ -106,10 +106,10 @@ def get_extraction_chain(
         [
             (
                 "system",
-                f"""# Knowledge Graph Instructions for GPT-4
+                f"""# Knowledge Graph Instructions
 ## 1. Overview
-You are a top-tier algorithm designed for extracting information in structured formats to build a knowledge graph from technical research papers related to AI, ML, NLP, RL, and Deep Learning.
-- **Nodes** represent entities and concepts relevant to these fields.
+You are a top-tier algorithm designed for extracting information in structured formats to build a knowledge graph from technical research papers.
+- **Nodes** represent entities and concepts relevant to the fields and areas research paper focusses on.
 - The aim is to achieve simplicity and clarity in the knowledge graph, making it accessible for a vast audience.
 ## 2. Labeling Nodes
 - **Consistency**: Ensure you use basic or elementary types for node labels.
@@ -159,13 +159,13 @@ def extract_and_store_graph(
 
 
 if __name__ == "__main__":
-    # graph.query("MATCH (n) DETACH DELETE n")
-    llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
+    graph.query("MATCH (n) DETACH DELETE n")
+    llm = ChatOpenAI(model="gpt-4", temperature=0)
     loader = DirectoryLoader("research_papers/", glob="*.pdf", loader_cls=PyPDFLoader)
     load_data = loader.load()
     text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=100)
 
-    documents = text_splitter.split_documents(load_data[:10])
+    documents = text_splitter.split_documents(load_data)
 
     for i, d in tqdm(enumerate(documents), total=len(documents)):
         extract_and_store_graph(d)
