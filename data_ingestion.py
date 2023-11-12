@@ -1,5 +1,20 @@
 from PyPDF2 import PdfReader
 import re
+import pandas as pd
+import nltk
+from textblob import TextBlob
+import spacy
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+
+# Load spacy's NER model
+nlp = spacy.load('en_core_web_sm')
 
 patterns_to_remove = [
     r'\(see Figure \d+\)',  # More specific pattern to remove references to figures
@@ -16,16 +31,11 @@ def clean_text(text):
     text = re.sub(r'(?<!\w)[-]', ' ', text)
     text = re.sub(r'(?<!\w)[^\w\s\'-]+', '', text)
     text = re.sub(r'(?<=\w)[^\w\s\'-]+', '', text)
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'\\[a-z]*', ' ', text)
     return text
 
-def clean_extracted_text(text):
-    # Remove non-ASCII characters
-    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
-    # Remove common LaTeX artifacts like \n, \x0b, etc.
-    text = re.sub(r'\\[a-z]*', ' ', text)
-    # Remove extra spaces
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip()
 
 def find_nearest_section(text, keywords):
     nearest_index = len(text)
@@ -43,14 +53,47 @@ def extract_conclusion(text):
     return conclusion
     
     
+def text_processing(text: str) -> str:
+    # Lowercasing
+    text = text.lower()
+
+    # Removing HTML tags
+    text = re.sub(r'<.*?>', '', text)
+
+    # Replace URLs and email addresses with a space
+    text = re.sub(r'http\S+|www\S+|https\S+', ' ', text, flags=re.MULTILINE)
+    text = re.sub(r'\S*@\S*\s?', ' ', text)
+
+    # Carefully replace or remove non-standard characters
+    # This regex will replace non-alphanumeric characters that are not within a word with a space
+    text = re.sub(r'(?<=\W)\W+|\W+(?=\W)', ' ', text)
+
+    # Tokenization and further cleaning
+    words = word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
+    lemmatizer = WordNetLemmatizer()
+    cleaned_words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words and word.isalpha()]
+
+    return ' '.join(cleaned_words)
+    
 if __name__=='__main__':
-    reader = PdfReader('./research_papers/2.pdf')
-    text = ""
-    for page in range(len(reader.pages)):
-        text += reader.pages[page].extract_text()
-      
-    text = clean_text(text)
+    data_dict = {'text': [], 'summary': []}
+    for i in range(1, 2):
+        reader = PdfReader(f'./research_papers/{i}.pdf')
+        text = ""
+        for page in range(len(reader.pages)):
+            text += reader.pages[page].extract_text()
+        
+        text = clean_text(text)
+        conclusion = extract_conclusion(text)
+        
+        data_dict['text'].append(text)
+        data_dict['summary'].append(conclusion)
     
-    cleaned_text = clean_extracted_text(text)
+    df = pd.DataFrame(data=data_dict)
+    df['processed_text'] = df['text'].apply(text_processing)
     
-    conclusion = extract_conclusion(cleaned_text)
+    df.to_csv('data.csv', index=False)
+    
+    print(df['processed_text'][0])
+    print(df.shape)
